@@ -17,12 +17,12 @@
  ***********************************************************************/
 
 import { 
+    ensureCliInstalled,
     expect as playExpect, 
     ExtensionsPage,  
-    test,
     isLinux,
-    ensureCliInstalled,
     ResourcesPage,  
+    test,
 } from '@podman-desktop/tests-playwright';
 
 const EXTENSION_IMAGE: string = 'ghcr.io/podman-desktop/podman-desktop-extension-minikube:nightly';
@@ -75,7 +75,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         test.skip(isLinux && !!process.env.GITHUB_ACTIONS);
         const settingsBar = await navigationBar.openSettings();
         await settingsBar.cliToolsTab.click();
-        await ensureCliInstalled(page, 'Minikube')
+        await ensureCliInstalled(page, 'Minikube');
     });
 
     test('Ensure Minikube extension can be disabled and enabled', async ({ navigationBar, page }) => {
@@ -86,7 +86,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         await minikubeExtension.disableExtension();
         await playExpect(minikubeExtension.enableButton).toBeEnabled();
         await navigationBar.openSettings();
-        const resourcesPage = new ResourcesPage(page)
+        const resourcesPage = new ResourcesPage(page);
         await playExpect.poll(async () => resourcesPage.resourceCardIsVisible(EXTENSION_NAME)).toBeFalsy();
 
         await minikubeExtension.enableExtension();
