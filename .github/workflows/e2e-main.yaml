@@ -54,7 +54,6 @@ jobs:
           path: ${{ github.event.inputs.repositoryName }}
 
       - uses: actions/checkout@v4
-        if: github.event_name == 'schedule'
         with: 
           path: extension-minikube
 
