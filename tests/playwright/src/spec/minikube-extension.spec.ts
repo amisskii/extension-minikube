@@ -61,6 +61,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         await playExpect.poll(async () => extensionsPage.extensionIsInstalled(EXTENSION_LABEL)).toBeTruthy();
         const minikubeExtension = await extensionsPage.getInstalledExtension(EXTENSION_NAME, EXTENSION_LABEL);
         await playExpect(minikubeExtension.status).toHaveText('ACTIVE');
+        await navigationBar.openExtensions();
     });
 
     test('Ensure Minikube extension details page is correctly displayed', async () => {
