@@ -18,8 +18,9 @@
 name: e2e-main
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
+  push:
+    branches:
+      - main
 
   workflow_dispatch:
     inputs:
@@ -120,3 +121,4 @@ jobs:
         with:
           name: e2e-tests
           path: ./**/tests/**/output/
+  
