@@ -69,6 +69,8 @@ jobs:
   e2e-tests:
     name: Run E2E tests
     runs-on: ubuntu-24.04
+    env:
+      SKIP_INSTALLATION: true
     steps:
     
       - uses: actions/checkout@v4
@@ -96,6 +98,17 @@ jobs:
         run: |
           # allow unprivileged user namespace
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: Build OpenShift Local extension from container file
+        working-directory: ./extension-minikube
+        run: |
+          podman build -t minikube_image . -f ./Containerile
+          CONTAINER_ID_MINIKUBE=$(podman create localhost/minikube_image --entrypoint "")
+          podman export $CONTAINER_ID_MINIKUBE > /tmp/minikube_extension.tar
+          mkdir -p tests/playwright/output/minikube-e2e-tests/plugins
+          tar -xf /tmp/minikube_extension.tar -C tests/playwright/output/minikube-e2e-tests/plugins
+          mv tests/playwright/output/minikube-e2e-tests/plugins/extension tests/playwright/output/minikube-e2e-tests/plugins/minikubeextension
+         
       - name: Install Minikube CLI
         id: minikube
         uses: medyagh/setup-minikube@latest
