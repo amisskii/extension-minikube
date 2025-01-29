@@ -103,3 +103,7 @@ jobs:
       - name: Execute pnpm in Minikube Extension
         working-directory: ./extension-minikube
         run: pnpm install --no-frozen-lockfile
+      
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
