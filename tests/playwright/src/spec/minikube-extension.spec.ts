@@ -157,7 +157,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         }
       });
   
-      test('Minikube cluster operations details - STOP', async ({ page }) => {
+      test('Minikube cluster operations details - STOpppP', async ({ page }) => {
         await resourceConnectionActionDetails(
           page,
           minikubeResourceCard,
