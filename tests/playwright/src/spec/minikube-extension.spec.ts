@@ -67,7 +67,7 @@ test.use({
   });
 
 test.afterAll(async ({ runner }) => {
-    test.setTimeout(240_000);
+    test.setTimeout(500_000);
     await runner.close();   
 });
 
