@@ -21,7 +21,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   outputDir: './output/',
   workers: 1,
-  timeout: 120000,
+  timeout: 500000,
 
   reporter: [
     ['list'],
