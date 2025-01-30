@@ -86,6 +86,15 @@ jobs:
         run: |
           echo "MINIKUBE_DRIVER=${{ github.event.inputs.minikube_driver || env.DEFAULT_MINIKUBE_DRIVER }}" >> $GITHUB_ENV
 
+      - name: Set cgroup_manager to 'cgroupfs' instead of systemd
+        run: |
+          mkdir -p ~/.config/containers
+          cat <<EOT >> ~/.config/containers/containers.conf
+          [engine]
+          cgroup_manager="cgroupfs"
+          EOT
+          podman info 
+
       - name: Revert unprivileged user namespace restrictions in Ubuntu 24.04
         run: |
           # allow unprivileged user namespace

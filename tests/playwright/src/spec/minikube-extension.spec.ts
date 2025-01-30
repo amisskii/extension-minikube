@@ -51,6 +51,8 @@ const driverGHA = process.env.MINIKUBE_DRIVER_GHA ?? '';
 
 
 test.beforeAll(async ({ runner, page, welcomePage }) => {
+    const env: { [key: string]: string } = process.env as { [key: string]: string };
+    env.KEEP_VIDEOS_ON_PASS = 'true';
     runner.setVideoAndTraceName('minikube-extension-e2e');
     await welcomePage.handleWelcomePage(true);
     extensionsPage = new ExtensionsPage(page);
