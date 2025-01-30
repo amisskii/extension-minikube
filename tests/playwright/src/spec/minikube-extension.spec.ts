@@ -68,11 +68,9 @@ test.use({
   });
 
 test.afterAll(async ({ runner }) => {
-    console.log('Deleting Minikube cluster...');
+    console.log('Deleting Minikube cluster');
     execSync('minikube delete', { stdio: 'inherit' });
 
-    console.log('Removing Minikube binary...');
-    execSync('sudo rm /usr/bin/minikube', { stdio: 'inherit' })
     await runner.close();   
 });
 
