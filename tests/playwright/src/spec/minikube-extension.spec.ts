@@ -145,7 +145,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
             await deleteCluster(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
           });
 
-      test('Create a Minikube cluster', async ({ page }) => {
+      test('Create a Minikube cluster details', async ({ page }) => {
         test.setTimeout(CLUSTER_CREATION_TIMEOUT);
         if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
           await createMinikubeCluster(page, CLUSTER_NAME, false, CLUSTER_CREATION_TIMEOUT, {driver: driverGHA});
