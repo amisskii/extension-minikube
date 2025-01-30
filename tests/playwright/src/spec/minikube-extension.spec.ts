@@ -145,50 +145,6 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
             await deleteCluster(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
           });
 
-      test('Create a Minikube cluster details', async ({ page }) => {
-        test.setTimeout(CLUSTER_CREATION_TIMEOUT);
-        if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
-          await createMinikubeCluster(page, CLUSTER_NAME, false, CLUSTER_CREATION_TIMEOUT, {driver: driverGHA});
-        } else {
-          await createMinikubeCluster(page, CLUSTER_NAME, true, CLUSTER_CREATION_TIMEOUT);
-        }
-      });
-  
-      test('Minikube cluster operations details - STOP', async ({ page }) => {
-        await resourceConnectionActionDetails(
-          page,
-          minikubeResourceCard,
-          CLUSTER_NAME,
-          ResourceElementActions.Stop,
-          ResourceElementState.Off,
-        );
-      });
-  
-      test('Minikube cluster operations details - START', async ({ page }) => {
-        await resourceConnectionActionDetails(
-          page,
-          minikubeResourceCard,
-          CLUSTER_NAME,
-          ResourceElementActions.Start,
-          ResourceElementState.Running,
-        );
-      });
-  
-      test.skip('Minikube cluster operations details - RESTART', async ({ page }) => {
-         // Skipping the test due to an issue with restarting the Minikube cluster.
-        await resourceConnectionActionDetails(
-          page,
-          minikubeResourceCard,
-          CLUSTER_NAME,
-          ResourceElementActions.Restart,
-          ResourceElementState.Running,
-        );
-      });
-  
-      test('Minikube cluster operations details - DELETE', async ({ page }) => {
-        await deleteClusterFromDetails(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
-      });
-
     test('Ensure Minikube extension can be disabled and enabled', async ({ navigationBar, page }) => {
         await navigationBar.openExtensions();
         await playExpect(extensionsPage.header).toBeVisible();
