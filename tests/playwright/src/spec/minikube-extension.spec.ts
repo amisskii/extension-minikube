@@ -19,13 +19,11 @@
 import { 
     checkClusterResources,
     deleteCluster,
-    deleteClusterFromDetails,
     ensureCliInstalled,
     expect as playExpect, 
     ExtensionsPage,  
     isLinux,
     resourceConnectionAction,
-    resourceConnectionActionDetails,
     ResourceConnectionCardPage,
     ResourceElementActions,
     ResourceElementState,
