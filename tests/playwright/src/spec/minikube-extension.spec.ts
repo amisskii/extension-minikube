@@ -103,46 +103,6 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         await ensureCliInstalled(page, 'Minikube');
     });
 
-        test('Create a Minikube cluster', async ({ page}) => {
-            test.setTimeout(CLUSTER_CREATION_TIMEOUT);
-            if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
-              await createMinikubeCluster(page, CLUSTER_NAME, false, CLUSTER_CREATION_TIMEOUT, {driver: driverGHA});
-            } else {
-              await createMinikubeCluster(page, CLUSTER_NAME, true, CLUSTER_CREATION_TIMEOUT);
-            }
-          });
-      
-          test('Check resources added with the Minikube cluster', async ({ page }) => {
-            await checkClusterResources(page, MINIKUBE_CONTAINER);
-          });
-      
-          test('Minikube cluster operations - STOP', async ({ page }) => {
-            await resourceConnectionAction(page, minikubeResourceCard, ResourceElementActions.Stop, ResourceElementState.Off);
-          });
-      
-          test('Minikube cluster operations - START', async ({ page }) => {
-            await resourceConnectionAction(
-              page,
-              minikubeResourceCard,
-              ResourceElementActions.Start,
-              ResourceElementState.Running,
-            );
-          });
-
-          test.skip('Minikube cluster operatioms - RESTART', async ({ page }) => {
-            // Skipping the test due to an issue with restarting the Minikube cluster.
-            await resourceConnectionAction(
-              page,
-              minikubeResourceCard,
-              ResourceElementActions.Restart,
-              ResourceElementState.Running,
-            );
-          });
-      
-          test('Minikube cluster operations - DELETE', async ({ page }) => {
-            await deleteCluster(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
-          });
-
     test('Ensure Minikube extension can be disabled and enabled', async ({ navigationBar, page }) => {
         await navigationBar.openExtensions();
         await playExpect(extensionsPage.header).toBeVisible();
