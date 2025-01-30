@@ -105,7 +105,6 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         await ensureCliInstalled(page, 'Minikube');
     });
 
-    test.describe('Minikube cluster e2e test', () => {
         test('Create a Minikube cluster', async ({ page}) => {
             test.setTimeout(CLUSTER_CREATION_TIMEOUT);
             if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
@@ -145,9 +144,7 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
           test('Minikube cluster operations - DELETE', async ({ page }) => {
             await deleteCluster(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
           });
-    });
 
-    test.describe('Minikube cluster operations - Details', () => {
       test('Create a Minikube cluster', async ({ page }) => {
         test.setTimeout(CLUSTER_CREATION_TIMEOUT);
         if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
@@ -191,8 +188,6 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
       test('Minikube cluster operations details - DELETE', async ({ page }) => {
         await deleteClusterFromDetails(page, EXTENSION_NAME, MINIKUBE_CONTAINER, CLUSTER_NAME);
       });
-    });
-    });
 
     test('Ensure Minikube extension can be disabled and enabled', async ({ navigationBar, page }) => {
         await navigationBar.openExtensions();
@@ -217,4 +212,5 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
         const minikubeExtension = await extensionsPage.getInstalledExtension(EXTENSION_NAME, EXTENSION_LABEL);
         await minikubeExtension.removeExtension();
     });
+  });
  
