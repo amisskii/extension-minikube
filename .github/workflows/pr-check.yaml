@@ -128,8 +128,6 @@ jobs:
           mkdir -p tests/playwright/tests/output/minikube-tests-pd/plugins
           tar -xf /tmp/local_minikube_extension.tar -C tests/playwright/tests/output/minikube-tests-pd/plugins
           
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Run All E2E tests
         working-directory: ./extension-minikube
