@@ -25,10 +25,11 @@ const RESOURCE_NAME: string = 'minikube';
 const CLUSTER_CREATION_TIMEOUT: number = 300_000;
 
 const EXTENSION_IMAGE: string = process.env.EXTENSION_IMAGE ?? 'ghcr.io/podman-desktop/podman-desktop-extension-minikube:nightly';
+const RUN_ON_OPENSHIFT_PIPELINES: boolean = process.env.CI_RUNNER === 'OpenShift';
 const EXTENSION_NAME: string = 'minikube';
 const EXTENSION_LABEL: string = 'podman-desktop.minikube';
 
-const driverGHA = process.env.MINIKUBE_DRIVER_GHA ?? '';;
+const driverGHA: string = process.env.MINIKUBE_DRIVER_GHA ?? '';;
 
 test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
   test.setTimeout(CLUSTER_CREATION_TIMEOUT);
@@ -42,8 +43,8 @@ test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
   await extensionsPage.openCatalogTab();
   await extensionsPage.installExtensionFromOCIImage(EXTENSION_IMAGE);
 
-  // Skip CLI install when tests run on linux gha or mac. 
-  if (!((isLinux && process.env.GITHUB_ACTIONS) || isMac)) {
+  // Skip CLI install when tests run on linux gha or macOs openshift pipelines. 
+  if (!((isLinux && process.env.GITHUB_ACTIONS) || RUN_ON_OPENSHIFT_PIPELINES)) {
     const settingsBar = await navigationBar.openSettings();
     await settingsBar.cliToolsTab.click();
     await ensureCliInstalled(page, 'Minikube');
@@ -59,6 +60,7 @@ test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
 test.afterAll(async ({ navigationBar, runner, page }) => {
   try {
     await deleteCluster(page, RESOURCE_NAME, MINIKUBE_NODE, CLUSTER_NAME);
+    //Delete minikube extension
     const extensionsPage = await navigationBar.openExtensions();
     await playExpect(extensionsPage.header).toBeVisible();
     const minikubeExtension = await extensionsPage.getInstalledExtension(EXTENSION_NAME, EXTENSION_LABEL);
