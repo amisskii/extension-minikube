@@ -70,7 +70,7 @@ test.afterAll(async ({ navigationBar, runner, page }) => {
   }
 });
 
-test.describe('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }, () => {
+test.describe.serial('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }, () => {
   test('Kubernetes Nodes test', async ({ page }) => {
     await checkKubernetesResourceState(page, KubernetesResources.Nodes, MINIKUBE_NODE, KubernetesResourceState.Running);
   });
