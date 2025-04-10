@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { checkKubernetesResourceState, deleteCluster, ensureCliInstalled, expect as playExpect, KubernetesResources, KubernetesResourceState, test} from '@podman-desktop/tests-playwright';
+import { checkKubernetesResourceState, deleteCluster, ensureCliInstalled, expect as playExpect, KubernetesResources, KubernetesResourceState, test, isLinux, minikubeExtension} from '@podman-desktop/tests-playwright';
 
 import { createMinikubeCluster} from '../utility/operations';
 
@@ -26,10 +26,9 @@ const RESOURCE_NAME: string = 'minikube';
 const CLUSTER_CREATION_TIMEOUT: number = 300_000;
 
 const EXTENSION_IMAGE: string = process.env.EXTENSION_IMAGE ?? 'ghcr.io/podman-desktop/podman-desktop-extension-minikube:nightly';
-const EXTENSION_NAME: string = 'minikube';
-const EXTENSION_LABEL: string = 'podman-desktop.minikube';
 
-const driverGHA: string = process.env.MINIKUBE_DRIVER_GHA ?? '';;
+const driverGha: string = process.env.MINIKUBE_DRIVER_GHA ?? '';
+const useGhaDriver: boolean = (process.env.GITHUB_ACTIONS && isLinux) || false
 
 test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
   test.setTimeout(CLUSTER_CREATION_TIMEOUT);
@@ -39,7 +38,7 @@ test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
   // Install minikube extension
   const extensionsPage = await navigationBar.openExtensions();
   await playExpect(extensionsPage.header).toBeVisible();
-  await playExpect.poll(async () => extensionsPage.extensionIsInstalled(EXTENSION_LABEL)).toBeFalsy();
+  await playExpect.poll(async () => extensionsPage.extensionIsInstalled(minikubeExtension.extensionFullLabel)).toBeFalsy();
   await extensionsPage.openCatalogTab();
   await extensionsPage.installExtensionFromOCIImage(EXTENSION_IMAGE);
 
@@ -47,8 +46,8 @@ test.beforeAll(async ({ runner, welcomePage, page, navigationBar }) => {
   await settingsBar.cliToolsTab.click();
   await ensureCliInstalled(page, 'Minikube');
 
-  if (process.env.GITHUB_ACTIONS && process.env.RUNNER_OS === 'Linux') {
-    await createMinikubeCluster(page, CLUSTER_NAME, false, CLUSTER_CREATION_TIMEOUT, {driver: driverGHA});
+  if (useGhaDriver) {
+    await createMinikubeCluster(page, CLUSTER_NAME, false, CLUSTER_CREATION_TIMEOUT, {driver: driverGha});
   } else {
     await createMinikubeCluster(page, CLUSTER_NAME, true, CLUSTER_CREATION_TIMEOUT);
   }
@@ -60,8 +59,8 @@ test.afterAll(async ({ navigationBar, runner, page }) => {
     //Delete minikube extension
     const extensionsPage = await navigationBar.openExtensions();
     await playExpect(extensionsPage.header).toBeVisible();
-    const minikubeExtension = await extensionsPage.getInstalledExtension(EXTENSION_NAME, EXTENSION_LABEL);
-    await minikubeExtension.removeExtension();
+    const minikubeExtensionCard = await extensionsPage.getInstalledExtension(minikubeExtension.extensionName, minikubeExtension.extensionLabel);
+    await minikubeExtensionCard.removeExtension();
   } finally {
     await runner.close();
   }
