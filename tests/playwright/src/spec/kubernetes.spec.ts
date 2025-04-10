@@ -59,7 +59,7 @@ test.afterAll(async ({ navigationBar, runner, page }) => {
     //Delete minikube extension
     const extensionsPage = await navigationBar.openExtensions();
     await playExpect(extensionsPage.header).toBeVisible();
-    const minikubeExtensionCard = await extensionsPage.getInstalledExtension(minikubeExtension.extensionName, minikubeExtension.extensionLabel);
+    const minikubeExtensionCard = await extensionsPage.getInstalledExtension(minikubeExtension.extensionName, minikubeExtension.extensionFullLabel);
     await minikubeExtensionCard.removeExtension();
   } finally {
     await runner.close();
