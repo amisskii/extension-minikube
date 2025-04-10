@@ -72,24 +72,17 @@ jobs:
         name: Install pnpm
         with:
           run_install: false
-          package_json_file: ./extension-minikube/package.json
 
-      - name: Install required tools for downloading and extracting release
-        run: sudo apt-get update && sudo apt-get install -y jq tar
-
-      - name: Download latest podman desktop prerelease
+      - name: Get the latest release tag and download, extract, and set binary path
         run: |
-          REPO="podman-desktop/testing-prereleases"
-          LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO/tags" | jq -r '.[0].name')
-          TAR_URL="https://github.com/$REPO/archive/refs/tags/${LATEST_TAG}.tar.gz"
-          curl -L -o "${LATEST_TAG}.tar.gz" "$TAR_URL"
+          LATEST_TAG=$(curl -s "https://api.github.com/repos/podman-desktop/testing-prereleases/tags" | jq -r '.[0].name')
+          RELEASE_URL=$(curl -s https://api.github.com/repos/podman-desktop/testing-prereleases/releases/tags/$LATEST_TAG | jq -r '.assets[] | select(.name | test("podman-desktop.*.tar.gz")) | .browser_download_url')
+          curl -L -o podman-desktop.tar.gz $RELEASE_URL
+          mkdir -p $GITHUB_WORKSPACE/podman-desktop
+          tar --strip-components=1 -xvzf podman-desktop.tar.gz -C $GITHUB_WORKSPACE/podman-desktop
 
-          mkdir podman-desktop
-          tar -xzf "${LATEST_TAG}.tar.gz" --strip-components=1 -C podman-desktop
-          chmod +x podman-desktop/podman-desktop
-
-      - name: Set podman-desktop binary path as env variable
-        run: echo "PODMAN_DESKTOP_PATH=$GITHUB_WORKSPACE/podman-desktop/podman-desktop" >> $GITHUB_ENV
+          BINARY_PATH=${GITHUB_WORKSPACE}/podman-desktop/podman-desktop
+          echo "PODMAN_DESKTOP_BINARY=${BINARY_PATH}" >> $GITHUB_ENV
     
       - name: Set the default minikube cluster driver env. variable
         env:
@@ -136,7 +129,7 @@ jobs:
       - name: Run All E2E tests
         working-directory: ./extension-minikube
         env:
-          PODMAN_DESKTOP_ARGS: ${{ env.PODMAN_DESKTOP_PATH }}
+          PODMAN_DESKTOP_BINARY: ${{ env.PODMAN_DESKTOP_BINARY }}
           MINIKUBE_DRIVER_GHA: ${{ env.MINIKUBE_DRIVER }}        
         run: pnpm test:e2e:k8s
 
