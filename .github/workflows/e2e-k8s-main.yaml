@@ -84,10 +84,8 @@ jobs:
           TAR_URL="https://github.com/$REPO/archive/refs/tags/${LATEST_TAG}.tar.gz"
           curl -L -o "${LATEST_TAG}.tar.gz" "$TAR_URL"
 
-      - name: Extract podman desktop prerelease archive into podman-desktop
-        run: |
           mkdir podman-desktop
-          tar -xzf *.tar.gz --strip-components=1 -C podman-desktop
+          tar -xzf "${LATEST_TAG}.tar.gz" --strip-components=1 -C podman-desktop
           chmod +x podman-desktop/podman-desktop
 
       - name: Set podman-desktop binary path as env variable
