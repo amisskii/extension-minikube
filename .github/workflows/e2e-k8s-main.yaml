@@ -63,22 +63,35 @@ jobs:
       - uses: actions/checkout@v4
         with: 
           path: extension-minikube
-
-      - uses: actions/checkout@v4
-        with:
-          repository: podman-desktop/podman-desktop
-          ref: main
-          path: podman-desktop
-
+    
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
           run_install: false
           package_json_file: ./podman-desktop/package.json
+
+      - name: Install required tools for downloading and extracting release
+        run: sudo apt-get update && sudo apt-get install -y jq tar
+
+      - name: Download latest podman desktop prerelease
+        run: |
+          REPO="podman-desktop/testing-prereleases"
+          LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO/tags" | jq -r '.[0].name')
+          TAR_URL="https://github.com/$REPO/archive/refs/tags/${LATEST_TAG}.tar.gz"
+          curl -L -o "${LATEST_TAG}.tar.gz" "$TAR_URL"
+
+      - name: Extract podman desktop prerelease archive into podman-desktop
+        run: |
+          mkdir podman-desktop
+          tar -xzf *.tar.gz --strip-components=1 -C podman-desktop
+          chmod +x podman-desktop/podman-desktop
+
+      - name: Set podman-desktop binary path as env variable
+        run: echo "PODMAN_DESKTOP_PATH=$GITHUB_WORKSPACE/podman-desktop/podman-desktop" >> $GITHUB_ENV
     
       - name: Set the default minikube cluster driver env. variable
         env:
@@ -110,14 +123,6 @@ jobs:
         run: |
           minikube version
             
-      - name: Execute pnpm
-        working-directory: ./podman-desktop
-        run: pnpm install
-
-      - name: Build Podman Desktop for E2E tests
-        working-directory: ./podman-desktop
-        run: pnpm build
-      
       - name: Ensure getting current HEAD version of the test framework
         working-directory: ./extension-minikube
         run: |
@@ -133,9 +138,20 @@ jobs:
       - name: Run All E2E tests
         working-directory: ./extension-minikube
         env:
-          PODMAN_DESKTOP_ARGS: ${{ github.workspace }}/podman-desktop
+          PODMAN_DESKTOP_ARGS: ${{ env.PODMAN_DESKTOP_PATH }}
           MINIKUBE_DRIVER_GHA: ${{ env.MINIKUBE_DRIVER }}        
         run: pnpm test:e2e:k8s
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: always() # always run even if the previous step fails
+        with:
+          fail_on_failure: true
+          include_passed: true
+          detailed_summary: true
+          annotate_only: true
+          require_tests:  true
+          report_paths: '**/*results.xml'
 
       - uses: actions/upload-artifact@v4
         if: always()
