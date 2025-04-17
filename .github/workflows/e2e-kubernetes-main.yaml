@@ -62,7 +62,7 @@ jobs:
         with:
           repository: ${{ github.event.inputs.organization }}/${{ github.event.inputs.repositoryName }}
           ref: ${{ github.event.inputs.branch }}
-          path: ${{ github.event.inputs.repositoryName }}
+          path: extension-minikube
 
       - uses: actions/checkout@v4
         if: github.event_name == 'push'
@@ -87,11 +87,9 @@ jobs:
     
       - name: Set default env. variables
         env:
-          DEFAULT_MINIKUBE_REPO_NAME: 'extension-minikube'
           DEFAULT_EXTENSION_IMAGE: 'ghcr.io/podman-desktop/podman-desktop-extension-minikube:nightly'
           DEFAULT_MINIKUBE_DRIVER: 'docker'
-        run: |
-          echo "MINIKUBE_REPO_NAME=${{ github.event.inputs.repository_name || env.DEFAULT_MINIKUBE_REPO_NAME }}" >> $GITHUB_ENV
+        run:
           echo "EXTENSION_IMAGE=${{ github.event.inputs.extension_image || env.DEFAULT_EXTENSION_IMAGE }}" >> $GITHUB_ENV
           echo "MINIKUBE_DRIVER=${{ github.event.inputs.minikube_driver || env.DEFAULT_MINIKUBE_DRIVER }}" >> $GITHUB_ENV
       
@@ -149,7 +147,7 @@ jobs:
         run: pnpm test:e2e:build
       
       - name: Ensure getting current HEAD version of the test framework
-        working-directory: ./${{ env.MINIKUBE_REPO_NAME }}
+        working-directory: ./extension-minikube
         run: |
           # workaround for https://github.com/containers/podman-desktop-extension-bootc/issues/712
           version=$(npm view @podman-desktop/tests-playwright@next version)
@@ -157,11 +155,11 @@ jobs:
           jq --arg version "$version" '.devDependencies."@podman-desktop/tests-playwright" = $version' package.json > package.json_tmp && mv package.json_tmp package.json
 
       - name: Execute pnpm in Minikube Extension
-        working-directory: ./${{ env.MINIKUBE_REPO_NAME }}
+        working-directory: ./extension-minikube
         run: pnpm install --no-frozen-lockfile
           
       - name: Run All E2E tests
-        working-directory: ./${{ env.MINIKUBE_REPO_NAME }}
+        working-directory: ./extension-minikube
         env:
           PODMAN_DESKTOP_ARGS: ${{ github.workspace }}/podman-desktop
           EXTENSION_IMAGE: ${{ env.EXTENSION_IMAGE }}
