@@ -91,7 +91,7 @@ jobs:
           DEFAULT_EXTENSION_IMAGE: 'ghcr.io/podman-desktop/podman-desktop-extension-minikube:nightly'
           DEFAULT_MINIKUBE_DRIVER: 'docker'
         run: |
-          echo "MINIKUBE_REPO_NAME==${{ github.event.inputs.repository_name || env.DEFAULT_MINIKUBE_REPO_NAME }}" >> $GITHUB_ENV
+          echo "MINIKUBE_REPO_NAME=${{ github.event.inputs.repository_name || env.DEFAULT_MINIKUBE_REPO_NAME }}" >> $GITHUB_ENV
           echo "EXTENSION_IMAGE=${{ github.event.inputs.extension_image || env.DEFAULT_EXTENSION_IMAGE }}" >> $GITHUB_ENV
           echo "MINIKUBE_DRIVER=${{ github.event.inputs.minikube_driver || env.DEFAULT_MINIKUBE_DRIVER }}" >> $GITHUB_ENV
       
