@@ -83,7 +83,7 @@ test.afterAll(async ({ navigationBar, runner, page }) => {
   }
 });
 
-test.describe.serial('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }, () => {
+test.describe('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }, () => {
   test('Kubernetes Nodes test', async ({ page }) => {
     await checkKubernetesResourceState(page, KubernetesResources.Nodes, MINIKUBE_NODE, KubernetesResourceState.Running);
   });
@@ -102,7 +102,6 @@ test.describe.serial('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }
         DEPLOYMENT_NAME,
         DEPLOYMENT_YAML_PATH,
       );
-      await checkDeploymentReplicasInfo(page, KubernetesResources.Deployments, DEPLOYMENT_NAME, 3);
       await checkKubernetesResourceState(
         page,
         KubernetesResources.Deployments,
@@ -110,11 +109,11 @@ test.describe.serial('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }
         KubernetesResourceState.Running,
         80_000,
       );
+      await checkDeploymentReplicasInfo(page, KubernetesResources.Deployments, DEPLOYMENT_NAME, 3);
     });
     test('Edit the Kubernetes deployment YAML file', async ({ page }) => {
       test.setTimeout(120_000);
       await editDeploymentYamlFile(page, KubernetesResources.Deployments, DEPLOYMENT_NAME);
-      await checkDeploymentReplicasInfo(page, KubernetesResources.Deployments, DEPLOYMENT_NAME, 5);
       await checkKubernetesResourceState(
         page,
         KubernetesResources.Deployments,
@@ -122,6 +121,7 @@ test.describe.serial('Kubernetes resources End-to-End test', { tag: '@k8s_e2e' }
         KubernetesResourceState.Running,
         80_000,
       );
+      await checkDeploymentReplicasInfo(page, KubernetesResources.Deployments, DEPLOYMENT_NAME, 5);
     });
     test('Delete the Kubernetes deployment resource', async ({ page }) => {
       await deleteKubernetesResource(page, KubernetesResources.Deployments, DEPLOYMENT_NAME);
