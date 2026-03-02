@@ -147,10 +147,10 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
       const imagesPage = await navigationBar.openImages();
       const pullImagePage = await imagesPage.openPullImage();
       await pullImagePage.pullImage(IMAGE_TO_PULL, IMAGE_TAG);
-      await playExpect.poll(async () => imagesPage.waitForImageExists(IMAGE_TO_PULL, 10_000)).toBeTruthy();
+      await playExpect.poll(async () => imagesPage.waitForImageExists('docker.io/library/alphine', 10_000)).toBeTruthy();
 
       const containersPage = await imagesPage.startContainerWithImage(
-        IMAGE_TO_PULL,
+        'docker.io/library/alphine',
         CONTAINER_NAME,
         CONTAINER_START_PARAMS,
       );
