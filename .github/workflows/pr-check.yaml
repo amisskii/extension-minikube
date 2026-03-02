@@ -88,10 +88,40 @@ jobs:
           ref: main
           path: podman-desktop
 
-      - name: Revert unprivileged user namespace restrictions in Ubuntu 24.04
+      - name: Download prerelease binaries
         run: |
-          # allow unprivileged user namespace
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          # Fetch the latest tag from the testing-prereleases repository
+          LATEST_TAG=$(curl -s https://api.github.com/repos/podman-desktop/testing-prereleases/tags | jq -r '.[0].name')
+          LATEST_VERSION=${LATEST_TAG:1} #removing the leading 'v' character
+          echo "Latest prerelease tag: $LATEST_TAG"
+          echo "Latest prerelease version: $LATEST_VERSION"
+          
+          # Construct the download URL for the tarball
+          DOWNLOAD_URL="https://github.com/podman-desktop/testing-prereleases/releases/download/${LATEST_TAG}/podman-desktop-${LATEST_VERSION}-x64.tar.gz"
+          echo "Downloading from: $DOWNLOAD_URL"
+          
+          # Download the tarball
+          curl -L -o podman-desktop-prerelease.tar.gz "$DOWNLOAD_URL"
+          
+          # Extract tarball (it already contains a folder)
+          tar -xzf podman-desktop-prerelease.tar.gz
+          
+          # Rename the extracted folder to podman-desktop-prerelease
+          mv podman-desktop-${LATEST_VERSION}-x64 podman-desktop-prerelease
+
+          # Make the podman-desktop binary executable
+          chmod +x podman-desktop-prerelease/podman-desktop
+          
+          # Set environment variable for subsequent steps
+          PODMAN_DESKTOP_BINARY="${GITHUB_WORKSPACE}/podman-desktop-prerelease/podman-desktop"
+          echo "PODMAN_DESKTOP_BINARY=${PODMAN_DESKTOP_BINARY}" >> $GITHUB_ENV
+          echo "Podman Desktop binary path: ${PODMAN_DESKTOP_BINARY}"
+          
+          # Clean up tarball
+          rm podman-desktop-prerelease.tar.gz
+          
+          echo "Extracted to: podman-desktop-prerelease"
+          ls -la podman-desktop-prerelease
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -99,64 +129,45 @@ jobs:
           run_install: false
           package_json_file: ./podman-desktop/package.json
 
-      - name: Execute pnpm
-        working-directory: ./podman-desktop
-        run: pnpm install
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
-      - name: Build Podman Desktop for E2E tests
-        working-directory: ./podman-desktop
-        run: pnpm test:e2e:build
+        # on windows, wsl kernel update before this
+      - name: Update Podman
+        uses: redhat-actions/podman-install@main
+
+      - name: Install dbus-x11 package
+        run: sudo apt-get install dbus-x11
+
+      - name: Revert unprivileged user namespace restrictions in Ubuntu 24.04
+        run: |
+          # allow unprivileged user namespace
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Ensure getting current HEAD version of the test framework
         working-directory: ./extension-minikube
         run: |
-          # workaround for https://github.com/containers/podman-desktop-extension-bootc/issues/712
-          version=$(npm view @podman-desktop/tests-playwright@next version)
-          echo "Version of @podman-desktop/tests-playwright to be used: $version"
-          jq --arg version "$version" '.devDependencies."@podman-desktop/tests-playwright" = $version' package.json > package.json_tmp && mv package.json_tmp package.json
-
-      - name: Set cgroup_manager to 'cgroupfs' instead of systemd
-        run: |
-          mkdir -p ~/.config/containers
-          cat <<EOT >> ~/.config/containers/containers.conf
-          [engine]
-          cgroup_manager="cgroupfs"
-          EOT
-          podman info
-
-      - name: Execute pnpm in Minikube Extension
-        working-directory: ./extension-minikube
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Build minikube extension from container file
+          pnpm add -D @podman-desktop/tests-playwright@next
+      
+      - name: Build MINC extension from container file
         working-directory: ./extension-minikube
         run: |
-          pnpm build
-          podman build -t local_minikube_image ./
-          CONTAINER_ID=$(podman create localhost/local_minikube_image --entrypoint "")
-          podman export $CONTAINER_ID > /tmp/local_minikube_extension.tar
-          mkdir -p tests/playwright/tests/output/minikube-tests-pd/plugins
-          tar -xf /tmp/local_minikube_extension.tar -C tests/playwright/tests/output/minikube-tests-pd/plugins
-
+          podman build -f build/Containerfile -t local_minc_image ./
+          CONTAINER_ID=$(podman create localhost/local_minc_image --entrypoint "")
+          podman export $CONTAINER_ID > /tmp/local_minc_image.tar
+          mkdir -p tests/playwright/output/minc-tests-pd/plugins
+          tar -xf /tmp/local_minc_image.tar -C tests/playwright/output/minc-tests-pd/plugins/
+          
       - name: Run All E2E tests
         working-directory: ./extension-minikube
-        env:
-          PODMAN_DESKTOP_ARGS: ${{ github.workspace }}/podman-desktop
-          MINIKUBE_DRIVER_GHA: 'docker'
-        run: pnpm test:e2e
+        run: |
+          echo "PODMAN_DESKTOP_BINARY=${PODMAN_DESKTOP_BINARY}"
+          export $(dbus-launch)
+          export XDG_SESSION_TYPE=x11
+          pnpm test:e2e
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v6
-        if: always() # always run even if the previous step fails
-        with:
-          fail_on_failure: true
-          include_passed: true
-          detailed_summary: true
-          annotate_only: true
-          require_tests:  true
-          report_paths: '**/*results.xml'
-
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: e2e-tests
