@@ -67,7 +67,6 @@ jobs:
         timeout-minutes: 40
 
   e2e-tests:
-    if: github.event_name != 'pull_request'
     name: e2e tests
     runs-on: ubuntu-24.04
     env:
@@ -165,6 +164,7 @@ jobs:
           echo "PODMAN_DESKTOP_BINARY=${PODMAN_DESKTOP_BINARY}"
           export $(dbus-launch)
           export XDG_SESSION_TYPE=x11
+          export MINIKUBE_DRIVER_GHA=docker
           pnpm test:e2e
 
       - uses: actions/upload-artifact@v5
