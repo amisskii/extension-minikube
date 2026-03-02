@@ -152,7 +152,7 @@ jobs:
       - name: Build MINC extension from container file
         working-directory: ./extension-minikube
         run: |
-          podman build -f build/Containerfile -t local_minikube_image ./
+          podman build -f Containerfile -t local_minikube_image ./
           CONTAINER_ID=$(podman create localhost/local_minikube_image --entrypoint "")
           podman export $CONTAINER_ID > /tmp/local_minikube_image.tar
           mkdir -p tests/playwright/output/minilube-tests-pd/plugins
