@@ -51,7 +51,7 @@ const MINIKUBE_CONTAINER: string = CLUSTER_NAME;
 const KUBERNETES_CONTEXT: string = CLUSTER_NAME;
 const CLUSTER_CREATION_TIMEOUT: number = 300_000;
 
-const IMAGE_TO_PULL: string = 'ghcr.io/linuxcontainers/alpine';
+const IMAGE_TO_PULL: string = 'docker.io/alpine';
 const IMAGE_TAG: string = 'latest';
 const CONTAINER_NAME: string = 'alpine-container';
 const DEPLOYED_POD_NAME: string = CONTAINER_NAME;
