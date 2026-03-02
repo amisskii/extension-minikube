@@ -152,6 +152,8 @@ jobs:
       - name: Build MINC extension from container file
         working-directory: ./extension-minikube
         run: |
+          pnpm install
+          pnpm build
           podman build -f Containerfile -t local_minikube_image ./
           CONTAINER_ID=$(podman create localhost/local_minikube_image --entrypoint "")
           podman export $CONTAINER_ID > /tmp/local_minikube_image.tar
