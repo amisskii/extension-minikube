@@ -157,8 +157,8 @@ jobs:
           podman build -f Containerfile -t local_minikube_image ./
           CONTAINER_ID=$(podman create localhost/local_minikube_image --entrypoint "")
           podman export $CONTAINER_ID > /tmp/local_minikube_image.tar
-          mkdir -p tests/playwright/output/minikube-tests-pd/plugins
-          tar -xf /tmp/local_minikube_image.tar -C tests/playwright/output/minikube-tests-pd/plugins/
+          mkdir -p tests/playwright/tests/playwright/output/minikube-tests-pd/plugins
+          tar -xf /tmp/local_minikube_image.tar -C tests/playwright/tests/playwright/output/minikube-tests-pd/plugins/
 
       - name: Install Playwright Browsers
         working-directory: ./extension-minikube
