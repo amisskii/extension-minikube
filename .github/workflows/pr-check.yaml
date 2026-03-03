@@ -148,6 +148,11 @@ jobs:
         working-directory: ./extension-minikube
         run: |
           pnpm add -D @podman-desktop/tests-playwright@next
+
+      - name: Configure Podman for CI
+        run: |
+          mkdir -p ~/.config/containers
+          echo -e "[engine]\ncgroup_manager = \"cgroupfs\"\nevents_logger = \"file\"" > ~/.config/containers/containers.conf
       
       - name: Build MINC extension from container file
         working-directory: ./extension-minikube
@@ -168,10 +173,9 @@ jobs:
         working-directory: ./extension-minikube
         run: |
           echo "PODMAN_DESKTOP_BINARY=${PODMAN_DESKTOP_BINARY}"
-          export $(dbus-launch)
           export XDG_SESSION_TYPE=x11
           export MINIKUBE_DRIVER_GHA=docker
-          pnpm test:e2e
+          dbus-run-session -- pnpm test:e2e
 
       - uses: actions/upload-artifact@v5
         if: always()
