@@ -51,7 +51,7 @@ const MINIKUBE_CONTAINER: string = CLUSTER_NAME;
 const KUBERNETES_CONTEXT: string = CLUSTER_NAME;
 const CLUSTER_CREATION_TIMEOUT: number = 300_000;
 
-const IMAGE_TO_PULL: string = 'ghcr.io/linuxcontainers/alpine';
+const IMAGE_TO_PULL: string = 'docker.io/alpine';
 const IMAGE_TAG: string = 'latest';
 const CONTAINER_NAME: string = 'alpine-container';
 const DEPLOYED_POD_NAME: string = CONTAINER_NAME;
@@ -147,10 +147,10 @@ test.describe.serial('Podman Desktop Minikube Extension Tests', () => {
       const imagesPage = await navigationBar.openImages();
       const pullImagePage = await imagesPage.openPullImage();
       await pullImagePage.pullImage(IMAGE_TO_PULL, IMAGE_TAG);
-      await playExpect.poll(async () => imagesPage.waitForImageExists(IMAGE_TO_PULL, 10_000)).toBeTruthy();
+      await playExpect.poll(async () => imagesPage.waitForImageExists('docker.io/library/alpine', 10_000)).toBeTruthy();
 
       const containersPage = await imagesPage.startContainerWithImage(
-        IMAGE_TO_PULL,
+        'docker.io/library/alpine',
         CONTAINER_NAME,
         CONTAINER_START_PARAMS,
       );
